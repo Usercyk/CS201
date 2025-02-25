@@ -269,32 +269,107 @@ for k in sorted(d.keys()):
 
 ### Q5. 大语言模型（LLM）部署与测试
 
-本任务旨在本地环境或通过云虚拟机（如 https://clab.pku.edu.cn/ 提供的资源）部署大语言模型（LLM）并进行测试。用户界面方面，可以选择使用图形界面工具如 https://lmstudio.ai 或命令行界面如 https://www.ollama.com 来完成部署工作。
+1. 创建好虚拟机后，使用vscode进行连接
+![](https://raw.githubusercontent.com/Usercyk/images/main/20250225090543.png)
+2. 由于Rocky Linux缺少一些自带库，对其进行安装
+```bash
+sudo yum upgrade
+sudo yum install wget -y
+sudo yum install gcc gcc-c++ -y
+sudo yum install git -y
+```
+3. 下载miniconda
+```bash
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+sh Miniconda3-latest-Linux-x86_64.sh
+```
+4. 配置环境
+```bash
+conda create -n coder python=3.12
+conda activate coder
+```
+5. 连接ITS
+```python
+#!/usr/bin/env python3
+"""
+@File        :   login.py
+@Time        :   2025/02/25 08:07:47
+@Author      :   CLab
+@Description :   Login the ITS to connect the internet
+"""
+import requests
+import getpass
 
-测试内容包括选择若干编程题目，确保这些题目能够在所部署的LLM上得到正确解答，并通过所有相关的测试用例（即状态为Accepted）。选题应来源于在线判题平台，例如 OpenJudge、Codeforces、LeetCode 或洛谷等，同时需注意避免与已找到的AI接受题目重复。已有的AI接受题目列表可参考以下链接：
-https://github.com/GMyhf/2025spring-cs201/blob/main/AI_accepted_locally.md
+# 从命令行获取用户名和密码
+username = input("请输入用户名: ")
+password = getpass.getpass("请输入密码: ")
 
-请提供你的最新进展情况，包括任何关键步骤的截图以及遇到的问题和解决方案。这将有助于全面了解项目的推进状态，并为进一步的工作提供参考。
+url = "https://its4.pku.edu.cn/cas/ITSClient"
+payload = {
+    'username': username,
+    'password': password,
+    'iprange': 'free',
+    'cmd': 'open'
+}
+headers = {'Content-type': 'application/x-www-form-urlencoded'}
 
+result = requests.post(url, params=payload, headers=headers)
+print(result.text)
+```
+6. 下载vscode插件
+![](https://raw.githubusercontent.com/Usercyk/images/main/20250225091136.png)
+7. 下载一些库
+```bash
+pip install --upgrade pip # 更新pip
+pip install modelscope # 模型下载
+pip install autopep8 # 自动整理
+```
+8. 下载模型DeepSeek-Coder-V2-Lite-Instruct
+```python
+#!/usr/bin/env python3
+"""
+@File        :   download.py
+@Time        :   2025/02/24 18:56:49
+@Author      :   Usercyk
+@Description :   download the model
+"""
+from modelscope import snapshot_download
 
+if __name__ == "__main__":
+    model_dir = snapshot_download(
+        'deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct',
+        cache_dir='model/')
 
+```
+9. 由于虚拟机上只有虚拟显卡，提供一些基础的GUI渲染什么的，没有真正的GPU，所以只能采用cpu运行大模型。
+10. 下载vllm
+```bash
+git clone https://github.com/vllm-project/vllm.git
+```
+11. 构建vllm的cpu后端
+```bash
+pip install "cmake>=3.26" wheel packaging ninja "setuptools-scm>=8" numpy
+pip install -v -r requirements-cpu.txt --extra-index-url https://download.pytorch.org/whl/cpu
+VLLM_TARGET_DEVICE=cpu python setup.py install
+```
+12. 运行最后一句会占用大量CPU，以至于ssh都没有足够cpu运行而卡顿。在重启云虚拟机后，发现搭建进程完成了一半且有缓存，尝试继续运行，然后就被kill了……甚至连vllm的后端都搭不起来……下次试试不用vllm
+
+#### 问题
+1. sda4爆满：迁移到数据盘并创建符号链接
+```bash
+sudo mv /home/rocky/model /mnt/data/model
+sudo mv /home/rocky/vllm /mnt/data/vllm
+
+sudo ln -s /mnt/data/vllm /home/rocky/vllm
+sudo ln -s /mnt/data/model /home/rocky/model
+```
 
 
 ### Q6. 阅读《Build a Large Language Model (From Scratch)》第一章
 
-作者：Sebastian Raschka
-
-请整理你的学习笔记。这应该包括但不限于对第一章核心概念的理解、重要术语的解释、你认为特别有趣或具有挑战性的内容，以及任何你可能有的疑问或反思。通过这种方式，不仅能巩固你自己的学习成果，也能帮助他人更好地理解这一部分内容。
-
-
-
+没来得及看，一直在调云虚拟机并破防
 
 
 ## 2. 学习总结和个人收获
 
-<mark>如果发现作业题目相对简单，有否寻找额外的练习题目，如“数算2025spring每日选做”、LeetCode、Codeforces、洛谷等网站上的题目。</mark>
-
-
-
-
-
+正在完成寒假期间的每日选做
