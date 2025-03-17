@@ -5,6 +5,3 @@
 @Author      :   Usercyk
 @Description :   test
 """
-
-if __name__ == "__main__":
-    print("Hello CS201")
