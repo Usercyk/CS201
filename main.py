@@ -1,34 +1,14 @@
-# coding: utf-8
-"""
-@File        :   main.py
-@Time        :   2025/02/23 13:07:24
-@Author      :   Usercyk
-@Description :   test
-"""
+from itertools import islice
 
 
-def is_satisfied(scores, a):
-    adjusted_scores = [a * x + (1.1 ** (a * x)) for x in scores]
-    excellent_count = sum(score >= 85 for score in adjusted_scores)
-    return excellent_count / len(scores) >= 0.6
+def chunked_iterable(iterable, size):
+    return iter(lambda: tuple(islice(iter(iterable), size)), ())
 
 
-def find_min_b_binary_search(scores):
-    low, high = 1, 10**9
-
-    while low < high:
-        mid = (low + high) // 2
-        a = mid / 1000000000
-
-        if is_satisfied(scores, a):
-            high = mid  # 尝试更小的 b
-        else:
-            low = mid + 1  # 需要更大的 b
-
-    return low
+lst = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
-# 示例输入
-scores = [50.5, 100.0, 40.0]
-result = find_min_b_binary_search(scores)
-print(result)
+result = list(chunked_iterable(lst, 3))
+
+
+print(result)  # 输出: [(1, 2, 3), (4, 5, 6), (7, 8, 9)]
